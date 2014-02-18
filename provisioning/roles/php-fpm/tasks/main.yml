@@ -1,0 +1,154 @@
+---
+- name: PHP - Install
+  apt: pkg="{{ item }}" state=installed
+  with_items:
+    - php-pear
+    - php5-fpm
+    - php5-cli
+    - php5-dev
+    - php5-gd
+    - php5-curl
+    - php5-mcrypt
+    - php5-xdebug
+    - php5-sqlite
+    - php5-mysql
+    - php5-memcache
+    - php5-intl
+    - php5-tidy
+    - php5-imap
+    - php5-imagick
+
+- name: PHP - APCU
+  apt: pkg="php5-apcu" state=installed
+  when: with_php55
+
+- name: PHP - APC
+  apt: pkg="php5-apc" state=installed
+  when: not with_php55
+
+- name: PHP - Disable default configuration
+  command: mv /etc/php5/fpm/pool.d/www.conf /etc/php5/fpm/pool.d/www.disabled creates=/etc/php5/fpm/pool.d/www.disabled
+
+- name: PHP - Install appropriate pool configuration
+  template: src=www.conf dest=/etc/php5/fpm/pool.d/www.conf
+  notify: restart php-fpm
+
+- name: PHP - Install Composer
+  shell:
+    curl -sS https://getcomposer.org/installer | /usr/bin/php && /bin/mv -f /home/vagrant/composer.phar /usr/local/bin/composer
+    creates=/usr/local/bin/composer
+
+- name: ensure xdebug.max_nesting_level is ok for Symfony2
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.max_nesting_level='
+              line='xdebug.max_nesting_level=250'
+
+- name: ensure xdebug.scream is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.scream='
+              line='xdebug.scream=1'
+
+- name: ensure xdebug.cli_color is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.cli_color='
+              line='xdebug.cli_color=1'
+
+- name: ensure xdebug.show_local_vars is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.show_local_vars='
+              line='xdebug.show_local_vars=1'
+
+- name: ensure xdebug.remote_enable is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.remote_enable='
+              line='xdebug.remote_enable=1'
+
+- name: ensure xdebug.idekey is set
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.idekey='
+              line='xdebug.idekey="PhpStorm1"'
+
+- name: ensure xdebug.remote_autostart is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.remote_autostart='
+              line='xdebug.remote_autostart=1'
+
+- name: ensure xdebug.remote_connect_back is enabled
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.remote_connect_back='
+              line='xdebug.remote_connect_back=1'
+
+- name: ensure xdebug.remote_port is set to 9000
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.remote_port='
+              line='xdebug.remote_port=9000'
+
+- name: ensure xdebug.remote_handler is set to dbgp
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini
+              regexp='^xdebug.remote_handler='
+              line='xdebug.remote_handler=dbgp'
+
+- name: ensure php.ini memory_limit is ok for Drupal 8
+  lineinfile: dest=/etc/php5/fpm/php.ini
+              regexp='^memory_limit\s?='
+              line='memory_limit = 256M'
+
+- name: set PHP .ini timezone config (web)
+  lineinfile: dest=/etc/php5/fpm/php.ini
+               regexp='^date.timezone\s?='
+               line="date.timezone = \"Europe/Amsterdam\""
+
+- name: set PHP .ini timezone config (cli)
+  lineinfile: dest=/etc/php5/cli/php.ini
+              regexp='^date.timezone\s?='
+              line="date.timezone = \"Europe/Amsterdam\""
+
+- name: set php.ini display_error to ON
+  lineinfile: dest=/etc/php5/fpm/php.ini
+              regexp='^display_errors\s?='
+              line="display_errors = On"
+
+- name: set php.ini error_reporting to E_ALL
+  lineinfile: dest=/etc/php5/fpm/php.ini
+              regexp='^error_reporting\s?='
+              line="error_reporting = E_ALL"
+
+- name: ensure opcache.enable is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.enable='
+              line='opcache.enable=1'
+
+- name: ensure opcache.memory_consumption is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.memory_consumption='
+              line='opcache.memory_consumption=256'
+
+- name: ensure opcache.interned_strings_buffer is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.interned_strings_buffer='
+              line='opcache.interned_strings_buffer=8'
+
+- name: ensure opcache.revalidate_freq is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.revalidate_freq='
+              line='opcache.revalidate_freq=0'
+
+- name: ensure opcache.max_accelerated_files is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.max_accelerated_files='
+              line='opcache.max_accelerated_files=4000'
+
+- name: ensure opcache.fast_shutdown is enabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.fast_shutdown='
+              line='opcache.fast_shutdown=1'
+
+- name: ensure opcache.enable_cli is disabled
+  lineinfile: dest=/etc/php5/mods-available/opcache.ini
+              regexp='^opcache.enable_cli='
+              line='opcache.enable_cli=0'
+
+- name: Install appropriate pool configuration
+  template: src=www.conf dest=/etc/php5/fpm/pool.d/www.conf
+  notify: restart php-fpm
+

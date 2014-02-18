@@ -1,0 +1,17 @@
+---
+- name: add backports squeeze/wheezy repo
+  action: template src=backports.{{ ansible_lsb.codename }}.list.j2 dest=/etc/apt/sources.list.d/backports.list mode=0644
+
+- name: apt update
+  action: apt update_cache=yes
+
+- name: Install node via apt
+  apt: pkg=nodejs state=latest default_release=wheezy-backports
+
+- name: install node legacy
+  apt: pkg=nodejs-legacy state=latest default_release=wheezy-backports
+
+#- name: Install npm
+#  shell:
+#    curl https://npmjs.org/install.sh | sudo sh
+

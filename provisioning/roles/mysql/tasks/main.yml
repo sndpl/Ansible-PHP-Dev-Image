@@ -1,0 +1,39 @@
+---
+- name: install MySQL server packages
+  action: apt pkg="{{ item }}" state=present
+  with_items:
+    - mysql-server
+    - mysql-client
+    - python-mysqldb # used by mysql* ansible's modules
+    - mytop
+    - mysqltuner
+
+# Secure MySQL setup
+- name: update mysql root password for all root accounts
+  mysql_user: name=root host={{ item }} check_implicit_admin=yes password={{ mysql_root_password }} login_user=root login_password={{ mysql_root_password }}
+  with_items:
+    - "{{ hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: ensure anonymous users are not in the database
+  mysql_user: name='' host={{ item }} state=absent login_user=root login_password={{ mysql_root_password }}
+  with_items:
+    - localhost
+
+- name: remove the test database
+  mysql_db: name=test state=absent login_user=root login_password={{ mysql_root_password }}
+
+
+# Users and DBs setup
+- name: Ensure {{ mysql_database_name }} DB is present
+  mysql_db: name={{ mysql_database_name }} collation=utf8_unicode_ci encoding=utf8 state=present login_user=root login_password={{ mysql_root_password }}
+
+- name: Ensure {{ mysql_user }} mysql user is present
+  mysql_user: name='{{ mysql_user }}' password={{ mysql_user_password }} host=localhost state=present login_user=root login_password={{ mysql_root_password }} priv='{{ mysql_user }}.*:ALL'
+
+# Update MySQL Config
+- name: Deploy custom mysql config settings
+  template: src=custom.ini dest=/etc/mysql/conf.d/custom.ini
+  notify: restart mysql

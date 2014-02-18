@@ -1,0 +1,45 @@
+---
+- name: update apt
+  action: command /usr/bin/apt-get update
+
+- name: install python-software-properties
+  action: apt pkg=python-software-properties state=present
+
+- name: Common - Install common packages
+  apt: pkg="{{ item }}" state=latest
+  with_items:
+    - build-essential
+    - imagemagick
+    - vim
+    - curl
+    - git
+    - wget
+    - htop
+    - ack-grep
+    - ntp
+
+- name: ensure user `vagrant` is part of `vboxsf` group (to access shared folder)
+  user: name=vagrant groups=vboxsf append=yes
+
+- name: Common | Set the hostname /etc/hostname
+  shell: echo {{ hostname }} > /etc/hostname
+  when: hostname is defined
+
+- name: Set the hostname
+  shell: hostname {{ hostname }}
+  when: hostname is defined
+
+- name: add dotdeb squeeze/wheezy repo
+  action: template src=dotdeb.{{ ansible_lsb.codename }}.list.j2 dest=/etc/apt/sources.list.d/dotdeb.list mode=0644
+
+- name: download dotdeb gpg
+  action: get_url url=http://www.dotdeb.org/dotdeb.gpg dest=/tmp/dotdeb.gpg mode=0400
+
+- name: add dotdeb gpg
+  action: command apt-key add /tmp/dotdeb.gpg
+
+- name: apt update
+  action: apt update_cache=yes
+
+- name: update /etc/hosts
+  lineinfile: dest=/etc/hosts regexp='^127\.0\.0\.1' line='127.0.0.1 localhost {{ hostname }}' owner=root group=root mode=0644

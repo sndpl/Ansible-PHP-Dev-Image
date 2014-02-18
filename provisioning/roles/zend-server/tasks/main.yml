@@ -1,0 +1,30 @@
+---
+- name: add zend-server repo
+  action: template src=zend-server.list.j2 dest=/etc/apt/sources.list.d/zend-server.list mode=0644
+
+- name: download zend-server gpg
+  action: get_url url=http://repos.zend.com/zend.key dest=/tmp/zend.gpg mode=0400
+
+- name: add zend-server gpg
+  action: command apt-key add /tmp/zend.gpg
+
+- name: apt update
+  action: apt update_cache=yes
+
+- name: Install Zend-Server packages
+  apt: pkg="{{ item }}" state=latest
+  with_items:
+    - zend-server-php-5.3
+
+- name: Add Zend-Server to PATH
+  template: src=zend-server.sh dest=/etc/profile.d/zend-server.sh
+
+- name: ensure php.ini memory_limit is ok for Drupal 8
+  lineinfile: dest=/usr/local/zend/etc/php.ini
+              regexp='^memory_limit\s?='
+              line='memory_limit = 256M'
+
+- name: set PHP .ini timezone config (web)
+  lineinfile: dest=/usr/local/zend/etc/php.ini
+               regexp='^;date.timezone\s?='
+               line="date.timezone = \"Europe/Amsterdam\""

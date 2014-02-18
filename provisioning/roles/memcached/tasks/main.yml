@@ -1,0 +1,6 @@
+---
+- name: install Memcached packages
+  action: apt pkg="{{ item }}" state=present
+  with_items:
+    - memcached
+

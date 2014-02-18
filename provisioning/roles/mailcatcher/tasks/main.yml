@@ -1,0 +1,26 @@
+---
+- name: Commmon | MailUtils
+  apt: pkg=mailutils state=latest
+
+- name: Commmon | sqlite3
+  apt: pkg=sqlite3 state=latest
+
+- name: Commmon | libsqlite3-dev
+  apt: pkg=libsqlite3-dev state=latest
+
+- name: Common | Install rubygems package
+  apt: pkg=rubygems state=installed
+
+- name: MailCatcher | Install MailCatcher
+  action: command gem install mailcatcher creates=/usr/bin/mailcatcher
+
+- name: MailCatcher | Configure PHP Email
+  command: sed -ir "s/;\?sendmail_path =.*/sendmail_path = \/usr\/bin\/env \/usr\/bin\/catchmail/" /etc/php5/php-fpm/php.ini
+  command: sed -ir "s/;\?sendmail_path =.*/sendmail_path = \/usr\/bin\/env \/usr\/bin\/catchmail/" /etc/php5/cli/php.ini
+
+- name: MailCatcher | Kill MailCatcher
+  command: pkill mailcatcher
+  ignore_errors: yes
+
+- name: MailCatcher | Run MailCatcher
+  command: mailcatcher --ip=0.0.0.0

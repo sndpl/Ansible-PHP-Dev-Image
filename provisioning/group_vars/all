@@ -1,0 +1,11 @@
+---
+server_hostname: symfony.localhost
+
+php_fpm_socket: /var/run/php5-fpm.sock
+
+with_php55: true
+
+mysql_root_password: somepass
+mysql_database_name: symfony
+mysql_user: symfony
+mysql_user_password: mysymfonydatabasepassword

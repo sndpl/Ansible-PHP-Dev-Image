@@ -1,0 +1,16 @@
+---
+- name: Awesome Development Image
+  hosts: all
+  sudo: yes
+
+  roles:
+      - common
+      - zend-server
+#      - java
+#      - memcached
+#      - nodejs
+#      - redis
+#      - php-fpm
+#      - mysql
+#      - nginx
+#      - mailcatcher
