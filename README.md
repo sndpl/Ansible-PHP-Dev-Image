@@ -8,7 +8,7 @@ Build with Debian 7.x (Wheezy) including Nginx, MySQL, PHP-FPM and more packages
 - VirtualBox: https://www.virtualbox.org/wiki/Downloads
 - Vagrant: http://downloads.vagrantup.com/
 
-## Avaiable Roles
+## Available Roles
 
 - Java (openJDK)
 - MailCatcher
