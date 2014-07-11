@@ -114,36 +114,43 @@
               line="error_reporting = E_ALL"
 
 - name: ensure opcache.enable is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.enable='
               line='opcache.enable=1'
 
 - name: ensure opcache.memory_consumption is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.memory_consumption='
               line='opcache.memory_consumption=256'
 
 - name: ensure opcache.interned_strings_buffer is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.interned_strings_buffer='
               line='opcache.interned_strings_buffer=8'
 
 - name: ensure opcache.revalidate_freq is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.revalidate_freq='
               line='opcache.revalidate_freq=0'
 
 - name: ensure opcache.max_accelerated_files is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.max_accelerated_files='
               line='opcache.max_accelerated_files=4000'
 
 - name: ensure opcache.fast_shutdown is enabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.fast_shutdown='
               line='opcache.fast_shutdown=1'
 
 - name: ensure opcache.enable_cli is disabled
+  when: with_php55
   lineinfile: dest=/etc/php5/mods-available/opcache.ini
               regexp='^opcache.enable_cli='
               line='opcache.enable_cli=0'
